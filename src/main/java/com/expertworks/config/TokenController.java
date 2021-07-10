@@ -62,7 +62,7 @@ public class TokenController {
 	@ResponseBody
 	public String revokeToken(@PathVariable String tokenId) {
 
-		System.out.println("Revocking tokenId :  " + tokenId);
+		System.out.println("revokeToken tokenId :  " + tokenId);
 		tokenServices().revokeToken(tokenId);
 		return tokenId;
 	}

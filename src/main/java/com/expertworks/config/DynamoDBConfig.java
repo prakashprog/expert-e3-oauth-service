@@ -13,11 +13,10 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.util.StringUtils;
 
 @Configuration
-
-
 public class DynamoDBConfig {
-    @Value("${amazon.dynamodb.endpoint}")
-    private String amazonDynamoDBEndpoint;
+	
+	@Value("${amazon.dynamodb.endpoint}")
+	private String amazonDynamoDBEndpoint;
 
     @Value("${amazon.aws.accesskey}")
     private String amazonAWSAccessKey;
@@ -29,11 +28,9 @@ public class DynamoDBConfig {
     public AmazonDynamoDB amazonDynamoDB() {
         AmazonDynamoDB amazonDynamoDB
                 = new AmazonDynamoDBClient(amazonAWSCredentials());
-
         if (!StringUtils.isEmpty(amazonDynamoDBEndpoint)) {
             amazonDynamoDB.setEndpoint(amazonDynamoDBEndpoint);
         }
-
         return amazonDynamoDB;
     }
 

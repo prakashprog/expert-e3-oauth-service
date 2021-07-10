@@ -4,6 +4,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -31,9 +32,12 @@ import com.expertworks.model.ExpertUser;
 @Configuration
 @EnableAuthorizationServer
 public class AuthServerConfig extends AuthorizationServerConfigurerAdapter {
-	
-	private static final int ACCESS_TOKEN_VALIDITY_SECONDS = 60*60;
-	private static final int REFRESH_TOKEN_VALIDITY_SECONDS = 60*60;
+
+	private static final int ACCESS_TOKEN_VALIDITY_SECONDS = 60 * 60;
+	private static final int REFRESH_TOKEN_VALIDITY_SECONDS = 60 * 60;
+
+	@Value("${jwt.secret}")
+	private String jwtSecret;
 
 	@Autowired
 	private AuthenticationManager authenticationManager;
@@ -42,7 +46,7 @@ public class AuthServerConfig extends AuthorizationServerConfigurerAdapter {
 //	public TokenStore tokenStore() {
 //		return new JwtTokenStore(jwtAccessTokenConverter());
 //	}
-	
+
 	@Bean
 	public TokenStore tokenStore() {
 		return new InMemoryTokenStore();
@@ -57,19 +61,22 @@ public class AuthServerConfig extends AuthorizationServerConfigurerAdapter {
 
 			@Override
 			public OAuth2AccessToken enhance(OAuth2AccessToken accessToken, OAuth2Authentication authentication) {
-				//if (authentication.getOAuth2Request().getGrantType().equalsIgnoreCase("password")) {
-					final Map<String, Object> additionalInfo = new HashMap<String, Object>();
-					additionalInfo.put("userId", authentication.getName());
-					additionalInfo.put("name", ((ExpertUser) authentication.getPrincipal()).getFirstName());
-					additionalInfo.put("teamId", ((ExpertUser) authentication.getPrincipal()).getTeamId());
-					additionalInfo.put("role", ((ExpertUser) authentication.getPrincipal()).getRole());
-					additionalInfo.put("logo", ((ExpertUser) authentication.getPrincipal()).getLogo());
-					additionalInfo.put("partnerId", ((ExpertUser) authentication.getPrincipal()).getPartnerId());
-					((DefaultOAuth2AccessToken) accessToken).setAdditionalInformation(additionalInfo);
+				// if
+				// (authentication.getOAuth2Request().getGrantType().equalsIgnoreCase("password"))
+				// {
+				final Map<String, Object> additionalInfo = new HashMap<String, Object>();
+				additionalInfo.put("userId", authentication.getName());
+				additionalInfo.put("name", ((ExpertUser) authentication.getPrincipal()).getFirstName());
+				additionalInfo.put("teamId", ((ExpertUser) authentication.getPrincipal()).getTeamId());
+				additionalInfo.put("role", ((ExpertUser) authentication.getPrincipal()).getRole());
+				additionalInfo.put("logo", ((ExpertUser) authentication.getPrincipal()).getLogo());
+				additionalInfo.put("partnerId", ((ExpertUser) authentication.getPrincipal()).getPartnerId());
+				((DefaultOAuth2AccessToken) accessToken).setAdditionalInformation(additionalInfo);
 
-					System.out.println("cred : " + (authentication.getPrincipal()));
-					//System.out.println("cred : " + ((ExpertUser) authentication.getPrincipal()).getFirstName());
-				//}
+				System.out.println("cred : " + (authentication.getPrincipal()));
+				// System.out.println("cred : " + ((ExpertUser)
+				// authentication.getPrincipal()).getFirstName());
+				// }
 				accessToken = super.enhance(accessToken, authentication);
 				// ((DefaultOAuth2AccessToken) accessToken).setAdditionalInformation(new
 				// HashMap<>());
@@ -77,14 +84,14 @@ public class AuthServerConfig extends AuthorizationServerConfigurerAdapter {
 			}
 		};
 
-		converter.setSigningKey("javainuse");
+		converter.setSigningKey(jwtSecret);
 		return converter;
 	}
 
 	@Override
 	public void configure(ClientDetailsServiceConfigurer clients) throws Exception {
 		clients.inMemory().withClient("client").secret("secret")
-				.authorizedGrantTypes("password", "authorization_token", "refresh_token","implicit").scopes("write")
+				.authorizedGrantTypes("password", "authorization_token", "refresh_token", "implicit").scopes("write")
 				.accessTokenValiditySeconds(ACCESS_TOKEN_VALIDITY_SECONDS)
 				.refreshTokenValiditySeconds(REFRESH_TOKEN_VALIDITY_SECONDS);
 
@@ -94,8 +101,6 @@ public class AuthServerConfig extends AuthorizationServerConfigurerAdapter {
 	public void configure(AuthorizationServerEndpointsConfigurer endpoints) throws Exception {
 		endpoints.authenticationManager(authenticationManager).tokenStore(tokenStore())
 				.accessTokenConverter(jwtAccessTokenConverter()).userDetailsService(userDetailsService);
-	
-
 	}
 
 	@Bean
@@ -117,24 +122,22 @@ public class AuthServerConfig extends AuthorizationServerConfigurerAdapter {
 		bean.setOrder(Ordered.HIGHEST_PRECEDENCE);
 		return bean;
 	}
-	
+
 	@Override
 	public void configure(AuthorizationServerSecurityConfigurer oauthServer) throws Exception {
 		oauthServer.tokenKeyAccess("permitAll()").checkTokenAccess("isAuthenticated()");
 	}
-	
-	
-	 @Bean
-	    public CommonsRequestLoggingFilter requestLoggingFilter() {
-	         System.out.println("inside logging filter");
-	        CommonsRequestLoggingFilter loggingFilter = new CommonsRequestLoggingFilter()
-	        		;
-	        loggingFilter.setIncludeClientInfo(true);
-	        loggingFilter.setIncludeQueryString(true);
-	        loggingFilter.setIncludePayload(true);
-	        loggingFilter.setIncludeHeaders(false);
-	        loggingFilter.setMaxPayloadLength(64000);
-	        return loggingFilter;
-	    }
+
+	@Bean
+	public CommonsRequestLoggingFilter requestLoggingFilter() {
+		System.out.println("inside logging filter");
+		CommonsRequestLoggingFilter loggingFilter = new CommonsRequestLoggingFilter();
+		loggingFilter.setIncludeClientInfo(true);
+		loggingFilter.setIncludeQueryString(true);
+		loggingFilter.setIncludePayload(true);
+		loggingFilter.setIncludeHeaders(false);
+		loggingFilter.setMaxPayloadLength(64000);
+		return loggingFilter;
+	}
 
 }
