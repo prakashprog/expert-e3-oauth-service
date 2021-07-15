@@ -3,6 +3,8 @@ package com.expertworks.config;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.web.servlet.FilterRegistrationBean;
@@ -32,6 +34,8 @@ import com.expertworks.model.ExpertUser;
 @Configuration
 @EnableAuthorizationServer
 public class AuthServerConfig extends AuthorizationServerConfigurerAdapter {
+	
+    private final static Logger logger = LoggerFactory.getLogger(AuthServerConfig.class);
 
 	private static final int ACCESS_TOKEN_VALIDITY_SECONDS = 60 * 60;
 	private static final int REFRESH_TOKEN_VALIDITY_SECONDS = 60 * 60;
@@ -73,7 +77,7 @@ public class AuthServerConfig extends AuthorizationServerConfigurerAdapter {
 				additionalInfo.put("partnerId", ((ExpertUser) authentication.getPrincipal()).getPartnerId());
 				((DefaultOAuth2AccessToken) accessToken).setAdditionalInformation(additionalInfo);
 
-				System.out.println("cred : " + (authentication.getPrincipal()));
+				logger.info("cred : " + (authentication.getPrincipal()));
 				// System.out.println("cred : " + ((ExpertUser)
 				// authentication.getPrincipal()).getFirstName());
 				// }
@@ -137,6 +141,8 @@ public class AuthServerConfig extends AuthorizationServerConfigurerAdapter {
 		loggingFilter.setIncludePayload(true);
 		loggingFilter.setIncludeHeaders(false);
 		loggingFilter.setMaxPayloadLength(64000);
+		loggingFilter.setBeforeMessagePrefix("---REQUEST DATA : ");
+		loggingFilter.setAfterMessagePrefix("---RESPONSE DATA : ");
 		return loggingFilter;
 	}
 

@@ -5,6 +5,8 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.User.UserBuilder;
@@ -16,6 +18,7 @@ import org.springframework.security.oauth2.provider.token.DefaultTokenServices;
 import org.springframework.security.oauth2.provider.token.TokenStore;
 import org.springframework.stereotype.Service;
 
+import com.expertworks.config.AuthServerConfig;
 import com.expertworks.model.ExpertUser;
 import com.expertworks.model.UserDTO;
 import com.expertworks.model.UserDetailDynamoModel;
@@ -23,6 +26,8 @@ import com.expertworks.repository.UserRepository;
 
 @Service(value = "userService")
 public class UserDetailsServiceImpl implements UserDetailsService {
+	
+    private final static Logger logger = LoggerFactory.getLogger(UserDetailsServiceImpl.class);
 
 	@Autowired
 	UserRepository userDetailRepositry;
@@ -41,7 +46,7 @@ public class UserDetailsServiceImpl implements UserDetailsService {
 			userDetailDynamoModel = userDetailRepositry.findByUserId(username).get(0);
 		}
 
-		System.out.println("userDetailDynamoModel : " + userDetailDynamoModel);
+		logger.info("userDetailDynamoModel : " + userDetailDynamoModel);
 
 		if (null != userDetailDynamoModel && username.equals(userDetailDynamoModel.getUserId())) {
 			return Optional.of(userDetailDynamoModel);
@@ -65,7 +70,7 @@ public class UserDetailsServiceImpl implements UserDetailsService {
 		 * Here we are using dummy data, you need to load user data from database or
 		 * other third party application
 		 */
-		System.out.println("calling loadUserByUsername service :  " + userId);
+		logger.info("calling loadUserByUsername service :  " + userId);
 		ExpertUser expertUser = null;
 		UserBuilder builder = null;
 		String userRole = null;
@@ -73,27 +78,27 @@ public class UserDetailsServiceImpl implements UserDetailsService {
 		this.removeOlderTokens(userId);  // to get new token everytime
 
 		Optional<UserDetailDynamoModel> userDetailDynamoModel = loadUserFromDB(userId);
-		UserDetailDynamoModel userDetailDynamoModel1 = userDetailDynamoModel.get();
-		System.out.println("======================================");
-		System.out.println("UserId = " + userDetailDynamoModel1.getUserId());
-		System.out.println("Name = " + userDetailDynamoModel1.getUserName());
-		System.out.println("Role = " + userDetailDynamoModel1.getUserRole());
-		System.out.println("TeamId = " + userDetailDynamoModel1.getTeamId());
-		System.out.println("PartnerId = " + userDetailDynamoModel1.getPartnerId());
-		System.out.println("logo = " + userDetailDynamoModel1.getPartnerImg());
-		System.out.println("==============DB=======================");
+		UserDetailDynamoModel userDetailDynamoModelDB = userDetailDynamoModel.get();
+		logger.info("======================================");
+		logger.info("UserId = " + userDetailDynamoModelDB.getUserId());
+		logger.info("Name = " + userDetailDynamoModelDB.getUserName());
+		logger.info("Role = " + userDetailDynamoModelDB.getUserRole());
+		logger.info("TeamId = " + userDetailDynamoModelDB.getTeamId());
+		logger.info("PartnerId = " + userDetailDynamoModelDB.getPartnerId());
+		logger.info("logo = " + userDetailDynamoModelDB.getPartnerImg());
+		logger.info("==============DB=======================");
 
-		userRole = userDetailDynamoModel1.getUserRole();
+		userRole = userDetailDynamoModelDB.getUserRole();
 
-		if (userDetailDynamoModel1 != null) {
+		if (userDetailDynamoModelDB != null) {
 			List authorities = new ArrayList();
 			authorities.add(new SimpleGrantedAuthority(userRole));
-			expertUser = new ExpertUser(userDetailDynamoModel1.getUserId(), userDetailDynamoModel1.getPassword(), true,
-					true, true, true, authorities, userDetailDynamoModel1.getUserName(), "", "", 0, 0,
-					userDetailDynamoModel1.getTeamId(), userDetailDynamoModel1.getUserRole(),
-					userDetailDynamoModel1.getPartnerImg(),userDetailDynamoModel1.getPartnerId());
+			expertUser = new ExpertUser(userDetailDynamoModelDB.getUserId(), userDetailDynamoModelDB.getPassword(), true,
+					true, true, true, authorities, userDetailDynamoModelDB.getUserName(), "", "", 0, 0,
+					userDetailDynamoModelDB.getTeamId(), userDetailDynamoModelDB.getUserRole(),
+					userDetailDynamoModelDB.getPartnerImg(),userDetailDynamoModelDB.getPartnerId());
 
-			UserDTO userDTO = convertToDTO(userDetailDynamoModel1);
+			UserDTO userDTO = convertToDTO(userDetailDynamoModelDB);
 
 			builder = org.springframework.security.core.userdetails.User.withUsername(userDTO.getUsername());
 			// builder.password(new BCryptPasswordEncoder().encode(user.getPassword()));
