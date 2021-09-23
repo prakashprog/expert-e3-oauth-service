@@ -19,6 +19,9 @@ public class UserDetailDynamoModel {
 
 	@DynamoDBAttribute
 	private String userRole;
+	
+	@DynamoDBAttribute
+	private String groupId;
 
 	@DynamoDBAttribute
 	private String teamId;
@@ -29,6 +32,8 @@ public class UserDetailDynamoModel {
 	@DynamoDBAttribute
 	private String partnerId;
 	
+	@DynamoDBAttribute
+	private boolean enabled;
 
 
 
@@ -71,9 +76,6 @@ public class UserDetailDynamoModel {
 	public void setTeamId(String teamId) {
 		this.teamId = teamId;
 	}
-
-
-
 	public String getPartnerId() {
 		return partnerId;
 	}
@@ -88,5 +90,21 @@ public class UserDetailDynamoModel {
 
 	public void setPartnerImg(String partnerImg) {
 		this.partnerImg = partnerImg;
+	}
+
+	public boolean isEnabled() {
+		return enabled;
+	}
+
+	public void setEnabled(boolean enabled) {
+		this.enabled = enabled;
+	}
+
+	public String getGroupId() {
+		return groupId;
+	}
+
+	public void setGroupId(String groupId) {
+		this.groupId = groupId;
 	}
 }

@@ -14,6 +14,7 @@ public class ExpertUser extends User {
 	private final String teamId;
 	private final String role;
 	private final String logo;
+	private String groupId;
 	private String partnerId;
 	private final long phNumber;
 	private final long altPhNumber;
@@ -23,7 +24,7 @@ public class ExpertUser extends User {
 	public ExpertUser(String username, String password, boolean enabled, boolean accountNonExpired,
 			boolean credentialsNonExpired, boolean accountNonLocked, Collection authorities, String firstName,
 			String middleName, String lastName, long phNumber, long altPhNumber, String teamId,String role, String logo,
-			String partnerId) {
+			String partnerId,String groupId) {
 
 		super(username, password, enabled, accountNonExpired, credentialsNonExpired, accountNonLocked, authorities);
 
@@ -36,6 +37,7 @@ public class ExpertUser extends User {
 		this.role = role;
 		this.logo = logo;
 		this.partnerId=partnerId;
+		this.groupId=groupId;
 		
 	}
 
@@ -82,6 +84,14 @@ public class ExpertUser extends User {
 
 	public void setPartnerId(String partnerId) {
 		this.partnerId = partnerId;
+	}
+
+	public String getGroupId() {
+		return groupId;
+	}
+
+	public void setGroupId(String groupId) {
+		this.groupId = groupId;
 	}
 
 }

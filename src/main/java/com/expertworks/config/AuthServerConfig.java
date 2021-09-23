@@ -75,6 +75,9 @@ public class AuthServerConfig extends AuthorizationServerConfigurerAdapter {
 				additionalInfo.put("role", ((ExpertUser) authentication.getPrincipal()).getRole());
 				additionalInfo.put("logo", ((ExpertUser) authentication.getPrincipal()).getLogo());
 				additionalInfo.put("partnerId", ((ExpertUser) authentication.getPrincipal()).getPartnerId());
+				additionalInfo.put("groupId", ((ExpertUser) authentication.getPrincipal()).getGroupId());
+				
+		
 				((DefaultOAuth2AccessToken) accessToken).setAdditionalInformation(additionalInfo);
 
 				logger.info("cred : " + (authentication.getPrincipal()));
@@ -105,6 +108,7 @@ public class AuthServerConfig extends AuthorizationServerConfigurerAdapter {
 	public void configure(AuthorizationServerEndpointsConfigurer endpoints) throws Exception {
 		endpoints.authenticationManager(authenticationManager).tokenStore(tokenStore())
 				.accessTokenConverter(jwtAccessTokenConverter()).userDetailsService(userDetailsService);
+		
 	}
 
 	@Bean

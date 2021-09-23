@@ -83,20 +83,24 @@ public class UserDetailsServiceImpl implements UserDetailsService {
 		logger.info("UserId = " + userDetailDynamoModelDB.getUserId());
 		logger.info("Name = " + userDetailDynamoModelDB.getUserName());
 		logger.info("Role = " + userDetailDynamoModelDB.getUserRole());
+		logger.info("GroupId = " + userDetailDynamoModelDB.getGroupId());
 		logger.info("TeamId = " + userDetailDynamoModelDB.getTeamId());
 		logger.info("PartnerId = " + userDetailDynamoModelDB.getPartnerId());
 		logger.info("logo = " + userDetailDynamoModelDB.getPartnerImg());
+		logger.info("enabled = " + userDetailDynamoModelDB.isEnabled());
 		logger.info("==============DB=======================");
 
 		userRole = userDetailDynamoModelDB.getUserRole();
+		
+		//if (userDetailDynamoModelDB != null && userDetailDynamoModelDB.isEnabled()) {
 
-		if (userDetailDynamoModelDB != null) {
+		if (userDetailDynamoModelDB != null ) {
 			List authorities = new ArrayList();
 			authorities.add(new SimpleGrantedAuthority(userRole));
 			expertUser = new ExpertUser(userDetailDynamoModelDB.getUserId(), userDetailDynamoModelDB.getPassword(), true,
 					true, true, true, authorities, userDetailDynamoModelDB.getUserName(), "", "", 0, 0,
 					userDetailDynamoModelDB.getTeamId(), userDetailDynamoModelDB.getUserRole(),
-					userDetailDynamoModelDB.getPartnerImg(),userDetailDynamoModelDB.getPartnerId());
+					userDetailDynamoModelDB.getPartnerImg(),userDetailDynamoModelDB.getPartnerId(),userDetailDynamoModelDB.getGroupId());
 
 			UserDTO userDTO = convertToDTO(userDetailDynamoModelDB);
 
@@ -106,6 +110,7 @@ public class UserDetailsServiceImpl implements UserDetailsService {
 			builder.roles(userDTO.getRoles());  
 
 		} else {
+			System.out.println("Exception occured");
 			throw new UsernameNotFoundException("User not found.");
 		}
 
