@@ -9,8 +9,10 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.security.oauth2.common.OAuth2AccessToken;
+import org.springframework.security.oauth2.common.OAuth2RefreshToken;
 import org.springframework.security.oauth2.provider.token.DefaultTokenServices;
 import org.springframework.security.oauth2.provider.token.TokenStore;
+import org.springframework.security.oauth2.provider.token.store.InMemoryTokenStore;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -21,7 +23,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 public class TokenController {
-	
+
 	private final static Logger logger = LoggerFactory.getLogger(TokenController.class);
 
 	@CrossOrigin
@@ -55,6 +57,7 @@ public class TokenController {
 		if (tokens != null) {
 			System.out.println(tokens.size());
 			for (OAuth2AccessToken token : tokens) {
+
 				tokenValues.add(token.getValue());
 			}
 		}
@@ -70,5 +73,18 @@ public class TokenController {
 		tokenServices().revokeToken(tokenId);
 		return tokenId;
 	}
+
+	@RequestMapping(method = RequestMethod.POST, value = "/tokens/revokeRefreshToken/{tokenId:.*}")
+	@ResponseBody
+	public String revokeRefreshToken(@PathVariable String tokenId) {
+	    if (tokenStore instanceof InMemoryTokenStore){
+	    	OAuth2RefreshToken oauth2RefreshToken=tokenStore.readRefreshToken(tokenId);
+	    	System.out.println(" revokeRefreshToken : " + tokenId);
+	         tokenStore.removeRefreshToken(oauth2RefreshToken);
+	    }
+	    return tokenId;
+	}
+
+
 
 }

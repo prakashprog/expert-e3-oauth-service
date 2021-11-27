@@ -14,11 +14,11 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.oauth2.common.OAuth2AccessToken;
+import org.springframework.security.oauth2.common.OAuth2RefreshToken;
 import org.springframework.security.oauth2.provider.token.DefaultTokenServices;
 import org.springframework.security.oauth2.provider.token.TokenStore;
 import org.springframework.stereotype.Service;
 
-import com.expertworks.config.AuthServerConfig;
 import com.expertworks.model.ExpertUser;
 import com.expertworks.model.UserDTO;
 import com.expertworks.model.UserDetailDynamoModel;
@@ -26,7 +26,7 @@ import com.expertworks.repository.UserRepository;
 
 @Service(value = "userService")
 public class UserDetailsServiceImpl implements UserDetailsService {
-	
+
     private final static Logger logger = LoggerFactory.getLogger(UserDetailsServiceImpl.class);
 
 	@Autowired
@@ -91,7 +91,7 @@ public class UserDetailsServiceImpl implements UserDetailsService {
 		logger.info("==============DB=======================");
 
 		userRole = userDetailDynamoModelDB.getUserRole();
-		
+
 		//if (userDetailDynamoModelDB != null && userDetailDynamoModelDB.isEnabled()) {
 
 		if (userDetailDynamoModelDB != null ) {
@@ -107,7 +107,7 @@ public class UserDetailsServiceImpl implements UserDetailsService {
 			builder = org.springframework.security.core.userdetails.User.withUsername(userDTO.getUsername());
 			// builder.password(new BCryptPasswordEncoder().encode(user.getPassword()));
 			builder.password(userDTO.getPassword());
-			builder.roles(userDTO.getRoles());  
+			builder.roles(userDTO.getRoles());
 
 		} else {
 			System.out.println("Exception occured");
@@ -117,10 +117,22 @@ public class UserDetailsServiceImpl implements UserDetailsService {
 		return expertUser;
 	}
 
+//	public void removeOlderTokens(String userName) {
+//
+//		Collection<OAuth2AccessToken> tokens = tokenStore.findTokensByClientIdAndUserName("client", userName);
+//		for (OAuth2AccessToken token : tokens) {
+//			defaultTokenServices.revokeToken(token.getValue());
+//		}
+//
+//	}
+
+
 	public void removeOlderTokens(String userName) {
 
 		Collection<OAuth2AccessToken> tokens = tokenStore.findTokensByClientIdAndUserName("client", userName);
 		for (OAuth2AccessToken token : tokens) {
+			OAuth2RefreshToken oauth2RefreshToken = token.getRefreshToken();
+			tokenStore.removeRefreshToken(oauth2RefreshToken);
 			defaultTokenServices.revokeToken(token.getValue());
 		}
 

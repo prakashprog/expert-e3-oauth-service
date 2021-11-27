@@ -34,11 +34,14 @@ import com.expertworks.model.ExpertUser;
 @Configuration
 @EnableAuthorizationServer
 public class AuthServerConfig extends AuthorizationServerConfigurerAdapter {
-	
+
     private final static Logger logger = LoggerFactory.getLogger(AuthServerConfig.class);
 
-	private static final int ACCESS_TOKEN_VALIDITY_SECONDS = 60 * 60;
-	private static final int REFRESH_TOKEN_VALIDITY_SECONDS = 60 * 60;
+
+    private static final int ACCESS_TOKEN_VALIDITY_SECONDS =  20;
+	//private static final int ACCESS_TOKEN_VALIDITY_SECONDS = 60 * 60;
+	//private static final int ACCESS_TOKEN_VALIDITY_SECONDS = 4 * 60;
+	private static final int REFRESH_TOKEN_VALIDITY_SECONDS = 5 *60 * 60;
 
 	@Value("${jwt.secret}")
 	private String jwtSecret;
@@ -76,8 +79,8 @@ public class AuthServerConfig extends AuthorizationServerConfigurerAdapter {
 				additionalInfo.put("logo", ((ExpertUser) authentication.getPrincipal()).getLogo());
 				additionalInfo.put("partnerId", ((ExpertUser) authentication.getPrincipal()).getPartnerId());
 				additionalInfo.put("groupId", ((ExpertUser) authentication.getPrincipal()).getGroupId());
-				
-		
+
+
 				((DefaultOAuth2AccessToken) accessToken).setAdditionalInformation(additionalInfo);
 
 				logger.info("cred : " + (authentication.getPrincipal()));
@@ -97,18 +100,30 @@ public class AuthServerConfig extends AuthorizationServerConfigurerAdapter {
 
 	@Override
 	public void configure(ClientDetailsServiceConfigurer clients) throws Exception {
+		/*
+		 * clients.inMemory().withClient("client").secret("secret")
+		 * .authorizedGrantTypes("password", "authorization_token", "refresh_token",
+		 * "implicit").scopes("write")
+		 * .accessTokenValiditySeconds(ACCESS_TOKEN_VALIDITY_SECONDS)
+		 * .refreshTokenValiditySeconds(REFRESH_TOKEN_VALIDITY_SECONDS);
+		 */
+
 		clients.inMemory().withClient("client").secret("secret")
-				.authorizedGrantTypes("password", "authorization_token", "refresh_token", "implicit").scopes("write")
-				.accessTokenValiditySeconds(ACCESS_TOKEN_VALIDITY_SECONDS)
-				.refreshTokenValiditySeconds(REFRESH_TOKEN_VALIDITY_SECONDS);
+		.authorizedGrantTypes("password", "authorization_token", "refresh_token", "implicit","authorization_code").scopes("write")
+		.accessTokenValiditySeconds(ACCESS_TOKEN_VALIDITY_SECONDS)
+		.refreshTokenValiditySeconds(REFRESH_TOKEN_VALIDITY_SECONDS);
 
 	}
 
+	//https://coderedirect.com/questions/337694/revoke-jwt-oauth2-refresh-token
 	@Override
 	public void configure(AuthorizationServerEndpointsConfigurer endpoints) throws Exception {
-		endpoints.authenticationManager(authenticationManager).tokenStore(tokenStore())
-				.accessTokenConverter(jwtAccessTokenConverter()).userDetailsService(userDetailsService);
-		
+//		endpoints.authenticationManager(authenticationManager).tokenStore(tokenStore())
+//				.accessTokenConverter(jwtAccessTokenConverter()).userDetailsService(userDetailsService);
+
+		endpoints.authenticationManager(authenticationManager).tokenStore(tokenStore()).reuseRefreshTokens(false)
+		.accessTokenConverter(jwtAccessTokenConverter()).userDetailsService(userDetailsService);
+
 	}
 
 	@Bean
@@ -134,6 +149,7 @@ public class AuthServerConfig extends AuthorizationServerConfigurerAdapter {
 	@Override
 	public void configure(AuthorizationServerSecurityConfigurer oauthServer) throws Exception {
 		oauthServer.tokenKeyAccess("permitAll()").checkTokenAccess("isAuthenticated()");
+		//oauthServer.allowFormAuthenticationForClients().checkTokenAccess("permitAll()");
 	}
 
 	@Bean
