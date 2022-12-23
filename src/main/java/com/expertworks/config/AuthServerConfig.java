@@ -38,8 +38,8 @@ public class AuthServerConfig extends AuthorizationServerConfigurerAdapter {
     private final static Logger logger = LoggerFactory.getLogger(AuthServerConfig.class);
 
 
-    private static final int ACCESS_TOKEN_VALIDITY_SECONDS =  20;
-	//private static final int ACCESS_TOKEN_VALIDITY_SECONDS = 60 * 60;
+    //private static final int ACCESS_TOKEN_VALIDITY_SECONDS =  20;
+	private static final int ACCESS_TOKEN_VALIDITY_SECONDS = 60 * 60;
 	//private static final int ACCESS_TOKEN_VALIDITY_SECONDS = 4 * 60;
 	private static final int REFRESH_TOKEN_VALIDITY_SECONDS = 5 *60 * 60;
 
